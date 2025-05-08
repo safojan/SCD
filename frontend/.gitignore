@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Node.js dependencies
 node_modules/
 ./cache
@@ -94,7 +93,7 @@ public/
 
 # Windows files
 Thumbs.db
-=======
+
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -118,4 +117,3 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
->>>>>>> c7bf637b2847ecdae0bebf3962bd1b69c26c6d2e
