@@ -47,7 +47,7 @@ jobs:
     - name: Apply MongoDB resources
       run: |
         kubectl apply -f k8s/mongodb-pvc.yaml
-        kubectl apply -f k8s/mongodb-deployment.yaml
+        kubectl apply -f k8s/mongodb-deployement.yaml
 
     - name: Apply ConfigMap and Secrets
       run: |
