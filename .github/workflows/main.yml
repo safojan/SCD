@@ -1,0 +1,71 @@
+name: Build and Deploy to Minikube
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker to use Minikube's environment
+      run: |
+        echo "Configuring Docker to use Minikube's daemon..."
+        eval $(minikube -p minikube docker-env)
+
+    - name: Build Backend Docker image
+      run: |
+        cd backend
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/university-backend:latest .
+
+    - name: Build Frontend Docker image
+      run: |
+        cd frontend
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/university-frontend:latest .
+
+    - name: Login to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Push Docker images to Docker Hub
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/university-backend:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/university-frontend:latest
+
+    - name: Update deployment files
+      run: |
+        sed -i '' "s|DOCKER_USERNAME|${{ secrets.DOCKER_USERNAME }}|g" k8s/backend-deployment.yaml
+        sed -i '' "s|DOCKER_USERNAME|${{ secrets.DOCKER_USERNAME }}|g" k8s/frontend-deployment.yaml
+
+    - name: Apply namespace
+      run: kubectl apply -f k8s/namespace.yaml
+
+    - name: Apply MongoDB resources
+      run: |
+        kubectl apply -f k8s/mongodb-pvc.yaml
+        kubectl apply -f k8s/mongodb-deployment.yaml
+
+    - name: Apply ConfigMap and Secrets
+      run: |
+        kubectl apply -f k8s/backend-config.yaml
+        kubectl apply -f k8s/backend-secrets.yaml
+
+    - name: Deploy to Minikube
+      run: |
+        kubectl apply -f k8s/backend-deployment.yaml
+        kubectl apply -f k8s/frontend-deployment.yaml
+
+    - name: Verify deployment
+      run: |
+        echo "Waiting for backend deployment to be ready..."
+        kubectl -n university-system rollout status deployment/backend
+        
+        echo "Waiting for frontend deployment to be ready..."
+        kubectl -n university-system rollout status deployment/frontend
+        
+        echo "Getting all resources information..."
+        kubectl -n university-system get all -o wide
