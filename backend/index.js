@@ -6,6 +6,7 @@ const dotenv = require("dotenv")
 const app = express()
 const Routes = require("./routes/route.js")
 
+
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
@@ -25,11 +26,12 @@ const quizAssessmentRoutes = require('./routes/quizAssessmentRoutes');
 const scholarshipRoutes = require('./routes/scholarshipRoutes');
 
 
-const PORT = 3000;
+
 
 dotenv.config();
+PORT =process.env.PORT
 
-app.use((req, res, next) => {
+app.use((req , res, next) => {
   console.log({ method: req.method, path: req.url });
   next();
 });
@@ -91,6 +93,9 @@ const connectToDatabase = async () => {
 connectToDatabase();
 
 // module.exports.handler = serverless(app);
+
+
+
 
 app.listen(PORT, () => {
     console.log(`Server started at port no. ${PORT}`)
